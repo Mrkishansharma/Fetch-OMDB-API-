@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web Movie App</title>
+    <style>
+      /* Write necessery styles here  */
+      *{
+        padding: 0;
+        margin: 0;
+      }
+      #serach{
+        margin: auto;
+        width: 550px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+      }
+      #search-inp{
+        width: 80%;
+        font-size: 25px;
+        border-radius: 5px;
+        text-align: center;
+      }
+      #search-btn{
+        font-size: 25px;
+        border-radius: 5px;
+        background-color: blue;
+        cursor: pointer;
+        color: white;
+        padding: 0px 5px;
+      }
+      #movie_container{
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 10px;
+        margin: 10px 40px;
+      }
+      .card{
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        text-align: center;
+        border-radius: 5px;
+        padding: 20px 0px;
+      }
+      .card img{
+        width: 70%;
+        height: 40vh;
+      }
+      @media screen and (max-width:1400px) and (min-width:901px){
+        #movie_container{
+            grid-template-columns: repeat(3,1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="serach">
+      <input type="text" id="search-inp" placeholder="Search Movie Here"/>
+      <button id="search-btn">Search</button>
+    </div>
+    <div id="movie_container"></div>
+  </body>
+
+  <script>
+    // Write necessery JS here
+    let inp = document.getElementById("search-inp");
+    let btn = document.getElementById("search-btn");
+    let containerEl = document.getElementById("movie_container");
+
+    
+    btn.addEventListener("click", ()=> {
+      const url = `http://www.omdbapi.com/?apikey=b77b663a&s=${inp.value}`;
+
+      fetch(url)
+      .then((response => response.json()))
+      .then(data => {
+        displayMovies(data.Search)
+      }).catch( err => {
+        showError()
+      })
+    })
+
+    function displayMovies(data){
+        containerEl.innerHTML = ""
+        data.forEach(async function(element){
+            let response = await fetch(`http://www.omdbapi.com/?apikey=b77b663a&i=${element.imdbID}`)
+            let mydata = await response.json();
+            console.log(mydata.Released);
+
+            let card = document.createElement('div');
+            card.className = "card";
+
+            let img = document.createElement("img");
+            img.src = element.Poster;
+            img.className = "poster";
+
+            let title = document.createElement("h2");
+            title.innerText = element.Title;
+            title.className = "title";
+
+            let Released = document.createElement("h4");
+            Released.innerText = "Released Date:- "+mydata.Released;
+
+            let imdbRating = document.createElement("h4");
+            imdbRating.innerText = "Rating:- "+mydata.imdbRating + "⭐";
+
+            let recommended = document.createElement("h3");
+            recommended.innerText = "Recommended";
+            recommended.style.backgroundColor = "red"
+            if(mydata.imdbRating > 8.5){
+                recommended.style.display = "block"
+            }else{
+                recommended.style.display = "none"
+            }
+            
+            card.append(img,title,imdbRating,Released,recommended);
+            containerEl.append(card);
+      })
+    }
+    function showError(){
+      containerEl.innerHTML = "";
+      let errorContainer = document.createElement("h2");
+      errorContainer.innerText = "Movie not found!";
+      errorContainer.className = "error-container";
+      containerEl.append(errorContainer)
+    }
+  </script>
+</html>
